@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8 />
+	<title></title>
+    <style>
+        canvas {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Traffic Flow Simulation</h1> 
+    <canvas id="canvas" height="450" width="450"></canvas>
+    <p id="payout">$0</p>
+
+    <script type="text/javascript">
+        var ws = new WebSocket("ws://eeps29.caltech.edu/echo");
+
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        var canvas=document.getElementById("canvas"),
+            score =document.getElementById("payout"),
+        ctx = canvas.getContext("2d");
+
+
+        canvas.width = 1000;
+        canvas.height = 500;
+
+        var draw = function(position, lane, color) {
+            ctx.beginPath();
+            ctx.arc(position, 250 - lane * 25, 5, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        };
+
+
+        var drawHazard = function(position, lane, color) {
+            ctx.fillStyle = "rgb(255, 255, 0)";
+            ctx.fillRect(450, 100, 10, 200);
+
+        };
+
+        ws.onmessage = function(evt) {
+            var state = JSON.parse(evt.data);
+            console.log(state);
+
+            if(state.maxLength != canvas.width) {
+                canvas.width = state.maxLength;
+            }
+            
+            var payout = state["payout"];
+            score.innerHTML = "$" + payout;
+
+
+            ctx.clearRect(0, 0, 1000, 500);
+
+            if(state.hazard) {
+                drawHazard();
+            }
+
+            for(var idx in state.ids) {
+                var id = state.ids[idx];
+                var color;
+
+                if(state.id == id) {
+                    color = "rgb(255,0,0)";
+                } else {
+                    color = "#000";
+                };
+
+                if(mod(state.positions[id] - state.positions[state.id], 1000) < 200) {
+                    console.log((state.positions[id] - state.positions[state.id]) % 1000);
+                    draw(state.positions[id], state.lanes[id], color);
+                }
+            }
+
+        };
+        
+        window.onload = function() {
+            document.addEventListener("keydown", function(e) {
+                if(e.keyCode == 87) {
+                    ws.send("a");
+                };
+
+                if(e.keyCode == 83) {
+                    ws.send("s");
+                };
+                if(e.keyCode == 65) {
+                    ws.send("up");
+                }
+                if(e.keyCode == 68) {
+                    ws.send("down");
+                }
+            }, false);
+        };
+        
+        
+    </script>
+</body>
+</html>

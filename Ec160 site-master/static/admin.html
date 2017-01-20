@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8 />
+	<title></title>
+</head>
+<body>
+    <h1>Traffic Flow Simulation</h1> 
+
+    <p>
+        To clear the current simulation, press clear. To start a cleared simulation, press start.        
+    </p>
+
+    <form action="/clear" method="get">
+        <input type="submit" value="clear" />
+    </form>
+    <br />
+    <form action="/run" method="get">
+        <input type="text" value="name" name="name" placeholder="name" />
+        <input type="text" value="1000" name="length" placeholder="length" />
+
+        <input type="submit" value="start" />
+    </form>
+    <br />
+    <form action="/hazard" method="get">
+        <input type="submit" value="hazard" />
+    </form>
+
+
+</body>
+</html>
+
